@@ -1,6 +1,10 @@
 const generate = async (desc) => {
-    console.log(desc)
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyB4aGfd7YIhJDiOJaFAVh2PzuKr6FaHxxk', {
+    
+    const apires = await fetch("https://x.mobin.workers.dev/api/key")
+    const apikey = (await apires.json()).apikey;
+    console.log(apikey)
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apikey}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

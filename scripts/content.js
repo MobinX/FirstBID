@@ -1,4 +1,4 @@
-const showTooltip = (msg) => {
+const showTooltip = (msg,timeout=3000) => {
     // Create a tooltip 
     var tooltip = document.createElement('div');
     tooltip.style.position = 'fixed';
@@ -29,7 +29,7 @@ const showTooltip = (msg) => {
         tooltip.style.opacity = '0';
         document.body.removeChild(tooltip);
         console.log('tooltip removed');
-    }, 3000);
+    }, timeout);
 }
 
 const getAIProposal = async (desciption) => {
@@ -59,7 +59,7 @@ document.addEventListener("readystatechange", async (event) => {
                 let textarea = document.querySelector("textarea");
                 if (descElm !== null && descElm !== undefined && textarea !== null && textarea !== undefined && !executed && !isFetchingProposal) {
                     isFetchingProposal = true;
-                    showTooltip("Generating proposal ...");
+                    showTooltip("Generating proposal ...", 9000);
                     const response = await getAIProposal(descElm.innerText);
                     console.log("lol  ......")
                     textarea.value = response;
@@ -68,6 +68,7 @@ document.addEventListener("readystatechange", async (event) => {
                     descElm = null;
                     textarea = null;
                     isFetchingProposal = false;
+                    showTooltip("Generated", 3000);
 
                 }
             });
