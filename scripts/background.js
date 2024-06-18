@@ -14,7 +14,7 @@ const generate = async (desc) => {
                 "parts": [
                     {
                         "text": `
-                        Write a short  proposal for this freelance job description: 
+                        Write a short  proposal for this freelance job description must be within 1400 characters.: 
                         ${desc} 
                         Using this JSON schema: 
                             "response": string,
