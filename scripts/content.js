@@ -1,4 +1,4 @@
-const showTooltip = (msg,timeout=3000) => {
+const showTooltip = (msg, timeout = 3000, autohide = true) => {
     // Create a tooltip 
     var tooltip = document.createElement('div');
     tooltip.style.position = 'fixed';
@@ -24,16 +24,22 @@ const showTooltip = (msg,timeout=3000) => {
     console.log('tooltip created');
     console.log(tooltip);
 
-    // Remove tooltip after 3 seconds
-    setTimeout(() => {
+    const hide = () => {
         tooltip.style.opacity = '0';
         document.body.removeChild(tooltip);
         console.log('tooltip removed');
-    }, timeout);
+    }
+    // Remove tooltip after 3 seconds
+    if (autohide) {
+        setTimeout(() => {
+            hide();
+        }, timeout);
+    }
+    return hide;
 }
 
-const getAIProposal = async (desciption) => {
-    const response = await chrome.runtime.sendMessage({ type: "getAIProposal", desc:desciption });
+const getAIProposal = async (desciption,tamplate,portfolio) => {
+    const response = await chrome.runtime.sendMessage({ type: "getAIProposal", desc: desciption , tamplate: tamplate, portfolio: portfolio});
     console.log("response", response.res)
     return response.res;
 }
@@ -47,6 +53,7 @@ document.addEventListener("readystatechange", async (event) => {
         const bodyElement = document.querySelector("body");
         if (bodyElement) {
             let isFetchingProposal = false;
+
             console.log("adding observer")
             const observer = new MutationObserver(async () => {
                 if (oldHref !== document.location.href) {
@@ -59,8 +66,21 @@ document.addEventListener("readystatechange", async (event) => {
                 let textarea = document.querySelector("textarea");
                 if (descElm !== null && descElm !== undefined && textarea !== null && textarea !== undefined && !executed && !isFetchingProposal) {
                     isFetchingProposal = true;
-                    showTooltip("Generating proposal ...", 9000);
-                    const response = await getAIProposal(descElm.innerText);
+                    let hideTooltip = showTooltip("Generating proposal ...", 9000, false);
+                    let info = await chrome.storage.local.get(['tamplate','portfolio'])
+                    if(!info.tamplate || !info.portfolio || info.tamplate === "" || info.portfolio === ""){
+                        hideTooltip();
+                        showTooltip("Please set tamplate and portfolio in the sidebar", 3000);
+                     
+                        return;
+                    }
+                    const response = await getAIProposal(descElm.innerText,info.tamplate,info.portfolio);
+                    if(response === "ERROR"){
+                        hideTooltip();
+                        showTooltip("Error generating proposal", 3000);
+                        isFetchingProposal = false;
+                        return;
+                    }
                     console.log("lol  ......")
                     textarea.value = response;
                     console.log("executed .......", executed)
@@ -68,6 +88,7 @@ document.addEventListener("readystatechange", async (event) => {
                     descElm = null;
                     textarea = null;
                     isFetchingProposal = false;
+                    hideTooltip();
                     showTooltip("Generated", 3000);
 
                 }

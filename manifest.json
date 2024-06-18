@@ -13,8 +13,8 @@
             "16": "icons/icon16.png",
             "48": "icons/icon48.png",
             "128": "icons/icon128.png"
-        },
-        "default_popup": "views/popup.html"
+        }
+    
     },
     "permissions": [
         "storage",
@@ -25,10 +25,14 @@
         "webRequest",
         "alarms",
         "cookies",
-        "identity"
+        "identity",
+        "sidePanel"
     ],
     "background": {
         "service_worker": "scripts/background.js"
+    },
+    "side_panel": {
+        "default_path": "views/sidePanel.html"
     },
     "content_scripts": [
         {

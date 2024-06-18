@@ -1,4 +1,4 @@
-const generate = async (desc) => {
+const generate = async (info) => {
     
     const apires = await fetch("https://x.mobin.workers.dev/api/key")
     const apikey = (await apires.json()).apikey;
@@ -15,7 +15,12 @@ const generate = async (desc) => {
                     {
                         "text": `
                         Write a short  proposal for this freelance job description must be within 1400 characters.: 
-                        ${desc} 
+                        ${info.desc} 
+                        You must use the following tamplate:
+                        ${info.tamplate}
+                        You must use the following portfolios:
+                        ${info.portfolio}
+                        
                         Using this JSON schema: 
                             "response": string,
                         Strictly follow the instructions and provide a detailed proposal.
@@ -41,10 +46,10 @@ const generate = async (desc) => {
 
     const data = await response.json();
     console.log(data);
-    if(data.candidates[0]?.content.parts?.length > 0){
+    if(data.candidates){
         return (JSON.parse(data.candidates[0].content.parts[0].text))?.response;
     }
-    return data;
+    return "ERROR";
 }
 
 //=======================================================
@@ -54,10 +59,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         "from a content script:" + sender.tab.url :
         "from the extension");
     if (request.type === "getAIProposal") {
-        generate(request.desc).then(response => {
-            console.log("responsey", "response")
-            sendResponse({res: response}); //send response back to content.js
+        generate(request).then(response => {
+            if(response === "ERROR"){
+                sendResponse({type:"error",res: "ERROR"});
+                return;
+            }
+            console.log("responsey", response)
+            sendResponse({res: response,type:"ok"}); //send response back to content.js
         });
         return true; // Will respond asynchronously.
     }
 });
+
+//side Panel
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
